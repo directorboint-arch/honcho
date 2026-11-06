@@ -52,6 +52,8 @@ def test_declares_the_new_field_kinds():
     assert by_key["dialecticMaxChars"].kind == KIND_NUMBER
     assert by_key["userPeerAliases"].kind == KIND_JSON
     assert by_key["recallMode"].allowed_values() == {"hybrid", "context", "tools"}
+    assert by_key["migrateMemoryFiles"].kind == KIND_BOOL
+    assert by_key["migrateMemoryFiles"].default == "true"
     assert by_key["observationMode"].allowed_values() == {"directional", "unified"}
 
 

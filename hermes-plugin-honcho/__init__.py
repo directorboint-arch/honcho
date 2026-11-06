@@ -384,6 +384,8 @@ class HonchoMemoryProvider(DialecticMixin, MemoryProvider):
         if cfg.session_strategy == "per-session":
             logger.debug("Honcho memory file migration skipped: per-session strategy creates a fresh session per run (%s)",
                          self._session_key)
+        elif not cfg.migrate_memory_files:
+            logger.debug("Honcho memory file migration skipped: migrateMemoryFiles is disabled (%s)", self._session_key)
         elif not session.messages:
             try:
                 from hermes_constants import get_hermes_home

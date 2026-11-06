@@ -379,6 +379,53 @@ class TestPerSessionMigrateGuard:
         mock_manager.migrate_memory_files.assert_not_called()
 
 
+class TestMigrateMemoryFilesFlag:
+    """Verify the migrateMemoryFiles switch gates the one-shot upload for a new session.
+
+    Default True preserves the existing behaviour (upload on the first new
+    session); False is the opt-out for operators who keep their local memory
+    files out of Honcho on purpose.
+    """
+
+    def _make_provider_with_flag(self, migrate_memory_files, strategy="per-directory"):
+        from hermes_plugin_honcho.client import HonchoClientConfig
+        from unittest.mock import patch, MagicMock
+
+        cfg = HonchoClientConfig(
+            api_key="test-key",
+            enabled=True,
+            recall_mode="tools",
+            init_on_session_start=True,
+            session_strategy=strategy,
+            migrate_memory_files=migrate_memory_files,
+        )
+
+        provider = HonchoMemoryProvider()
+
+        mock_manager = MagicMock()
+        mock_session = MagicMock()
+        mock_session.messages = []  # empty = new session → reaches the migration gate
+        mock_manager.get_or_create.return_value = mock_session
+
+        with patch("hermes_plugin_honcho.client.HonchoClientConfig.from_global_config", return_value=cfg), \
+             patch("hermes_plugin_honcho.client.get_honcho_client", return_value=MagicMock()), \
+             patch("hermes_plugin_honcho.session.HonchoSessionManager", return_value=mock_manager), \
+             patch("hermes_constants.get_hermes_home", return_value=MagicMock()):
+            provider.initialize(session_id="test-session-002")
+
+        return provider, mock_manager
+
+    def test_migrate_skipped_when_flag_disabled(self):
+        """migrateMemoryFiles=False must NOT call migrate_memory_files on a new session."""
+        _, mock_manager = self._make_provider_with_flag(migrate_memory_files=False)
+        mock_manager.migrate_memory_files.assert_not_called()
+
+    def test_migrate_runs_when_flag_enabled(self):
+        """migrateMemoryFiles=True (default) keeps the existing new-session upload."""
+        _, mock_manager = self._make_provider_with_flag(migrate_memory_files=True)
+        mock_manager.migrate_memory_files.assert_called_once()
+
+
 class TestChunkMessage:
     def test_short_message_single_chunk(self):
         result = HonchoMemoryProvider._chunk_message("hello world", 100)

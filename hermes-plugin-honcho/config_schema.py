@@ -117,6 +117,9 @@ CONFIG_SCHEMA = ProviderConfigSchema(
                placeholder='{"sessionStart": ["summary", "peerCard"]}', group="Recall"),
         _field("initOnSessionStart", "Eager init", KIND_BOOL, "Initialize the session eagerly in tools mode instead of on first tool call.",
                default="false", group="Recall"),
+        _field("migrateMemoryFiles", "Migrate memory files", KIND_BOOL,
+               "Upload MEMORY.md/USER.md/SOUL.md to Honcho once when a brand-new session first starts. Set false to keep local memory files out of Honcho.",
+               default="true", group="Recall"),
         # — Limits —
         _field("messageMaxChars", "Message max chars", KIND_NUMBER, "Max chars per message sent to Honcho.",
                placeholder="25000", group="Limits"),

@@ -324,6 +324,7 @@ def _behavior_fields(look: _HostLookup, explicitly_configured: bool) -> dict[str
         "recall_mode": _normalize_choice(look.pick("recallMode") or "hybrid", _RECALL_MODES),
         "recall_sync": look.flag("recallSync", default=False),
         "init_on_session_start": look.flag("initOnSessionStart", default=False),
+        "migrate_memory_files": look.flag("migrateMemoryFiles", default=True),
         "injection_frequency": look.pick("injectionFrequency", "every-turn"),
         "context_cadence": look.parsed("contextCadence", int, 1),
         "dialectic_cadence": look.parsed("dialecticCadence", int, 1),
@@ -381,6 +382,10 @@ class HonchoClientConfig:
     recall_mode: str = "hybrid"
     recall_sync: bool = False  # bounded current-query automatic recall
     init_on_session_start: bool = False  # tools mode: init eagerly instead of on first tool call
+    # One-shot upload of MEMORY.md/USER.md/SOUL.md to a brand-new session. Default True
+    # preserves the existing behaviour; False is the opt-out for operators who keep their
+    # local memory files out of Honcho on purpose.
+    migrate_memory_files: bool = True
     injection_frequency: str = "every-turn"  # or "first-turn"
     context_cadence: int = 1  # min turns between peer.context() calls
     dialectic_cadence: int = 1  # min turns between dialectic prefetches
